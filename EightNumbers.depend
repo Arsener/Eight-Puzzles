@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1510469308 source:e:\codeblocks\eightnumbers\src\test.cpp
+	"Test.h"
+
+1510469389 e:\codeblocks\eightnumbers\include\test.h
+
+1510555691 source:e:\codeblocks\eightnumbers\main.cpp
+	<iostream>
+	<vector>
+	<stack>
+	<cmath>
+	<algorithm>
+
