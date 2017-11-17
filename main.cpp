@@ -65,6 +65,7 @@ int ifInOpen(Node n);
 int ifInClose(Node n);
 bool comp(const Node &a, const Node &b);
 bool ifNoSolution(Node n);
+int getFatherStatus(int fatherIndex);
 
 int main()
 {
@@ -90,6 +91,9 @@ int main()
     while(!open.empty()){
         Node current = open[0];
 
+        cout<<"---------------------------\n";
+        outputNode(current);
+
         if(current.h == 0){
             terminateStatus = current.father;
             break;
@@ -113,9 +117,18 @@ int main()
             }
         }
 
+        int fatherStatus = getFatherStatus(current.father);
+        int fatherX = fatherStatus / 10;
+        int fatherY = fatherStatus % 10;
+
         for(int i = 0; i < 4; i++){
             Node tmp;
             int nextZeroX = zeroX + dx[i], nextZeroY = zeroY + dy[i];
+
+            if(fatherStatus >= 0 && nextZeroX == fatherX && nextZeroY == fatherY){
+                continue;
+            }
+
             if(nextZeroX < 0 || nextZeroX > 2 || nextZeroY < 0 || nextZeroY > 2){
                 continue;
             }
@@ -138,7 +151,8 @@ int main()
             tmp.h = getEvaluate(tmp);
             tmp.f = tmp.g + tmp.h;
 
-
+            cout<<"--------\n";
+            outputNode(tmp);
 
             int openLoc = ifInOpen(tmp);
             int closeLoc = ifInClose(tmp);
@@ -177,6 +191,9 @@ int main()
     while(!solutionPath.empty()){
         cout << "---step" << step++ << ":---\n";
         outputNode(solutionPath.top());
+//        if(solutionPath.top().father != -1){
+//            cout << getFatherStatus(solutionPath.top().father) <<endl;
+//        }
         solutionPath.pop();
     }
 
@@ -240,15 +257,18 @@ bool comp(const Node &a, const Node &b){
 }
 
 bool ifNoSolution(Node n){
-    int p[9];
+    int p[8];
+    int index = 0;
     for(int i = 0; i < 3; i++){
         for(int j = 0; j < 3; j++){
-            p[3 * i + j] = n.node[i][j];
+            if(n.node[i][j]){
+                p[index++] = n.node[i][j];
+            }
         }
     }
 
     int reversePair = 0;
-    for(int i = 0; i < 9; i++){
+    for(int i = 0; i < 8; i++){
         for(int j = 0; j < i; j++){
             if(p[j] > p[i]){
                 reversePair++;
@@ -259,8 +279,27 @@ bool ifNoSolution(Node n){
     return reversePair % 2;
 }
 
+int getFatherStatus(int fatherIndex){
+    if(fatherIndex < 0){
+        return -1;
+    }
+
+    Node father = close[fatherIndex];
+    int x = 0, y = 0;
+    for(int i = 0; i <3; i++){
+        for(int j = 0; j < 3; j++){
+            if(!father.node[i][j]){
+                x = i;
+                y = j;
+            }
+        }
+    }
+
+    return x * 10 + y;
+}
+
 int getEvaluate(Node n){
-    return evaluate(n);
+    return evaluate2(n);
 }
 
 int evaluate(Node n){
