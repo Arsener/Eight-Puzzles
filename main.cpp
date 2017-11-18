@@ -53,6 +53,7 @@ vector<Node>::iterator itor;
 vector<int> test;
 int dx[4] = {0, 0, 1, -1};
 int dy[4] = {1, -1, 0, 0};
+const int METHOD = 2;
 
 void inputNode(Node *n);
 void outputNode(Node n);
@@ -93,6 +94,7 @@ int main()
 
         cout<<"---------------------------\n";
         outputNode(current);
+        cout << "g:" << current.g << " --- h:" << current.h << endl;
 
         if(current.h == 0){
             terminateStatus = current.father;
@@ -153,6 +155,7 @@ int main()
 
             cout<<"--------\n";
             outputNode(tmp);
+            cout << "g:" << tmp.g << " --- h:" << tmp.h << endl;
 
             int openLoc = ifInOpen(tmp);
             int closeLoc = ifInClose(tmp);
@@ -191,6 +194,7 @@ int main()
     while(!solutionPath.empty()){
         cout << "---step" << step++ << ":---\n";
         outputNode(solutionPath.top());
+        cout << "g:" << solutionPath.top().g << " --- h:" << solutionPath.top().h << endl;
 //        if(solutionPath.top().father != -1){
 //            cout << getFatherStatus(solutionPath.top().father) <<endl;
 //        }
@@ -253,7 +257,12 @@ int ifInClose(Node n){
 }
 
 bool comp(const Node &a, const Node &b){
-    return a.f < b.f;
+    if (a.f != b.f){
+        return a.f < b.f;
+    }
+    else{
+        return a.h < b.h;
+    }
 }
 
 bool ifNoSolution(Node n){
@@ -299,7 +308,15 @@ int getFatherStatus(int fatherIndex){
 }
 
 int getEvaluate(Node n){
-    return evaluate2(n);
+    if (METHOD == 0){
+        return evaluate(n);
+    }
+    else if(METHOD == 1){
+        return evaluate1(n);
+    }
+    else if (METHOD == 2){
+        return evaluate2(n);
+    }
 }
 
 int evaluate(Node n){
@@ -322,7 +339,8 @@ int evaluate1(Node n){
     int h = 0;
     for(int i = 0; i < 3; i++){
         for(int j = 0; j < 3; j++){
-            h += abs(n.node[i][j] - 3 * i - j);
+            if(n.node[i][j])
+                h += abs(n.node[i][j] - 3 * i - j);
         }
     }
 
