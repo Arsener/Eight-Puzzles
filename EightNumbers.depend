@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1511097223 source:e:\codeblocks\eightnumbers\main.cpp
+	<iostream>
+	<vector>
+	<stack>
+	<cmath>
+	<algorithm>
+

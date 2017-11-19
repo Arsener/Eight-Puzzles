@@ -35,6 +35,36 @@ to:
 Then calculate the sum of the distance that each number to its right location.
 The evaluation number of the example above is 1 + 3 + 2 + 4 + 1 + 3 + 3 + 1 + 0 = 18.
 
+Two tiles ¡®a¡¯ and ¡®b¡¯ are in a linear conflict if they are in the same row or column ,also their goal positions
+are in the same row or column and the goal position of one of the tiles is blocked by the other tile in that row.
+Let¡¯s take the following example
+
+2 4 5
+0 1 6
+3 8 7
+
+In this instance we see that tile 4 and tile 1 are in a linear conflict since we see that tile 4 is in the path
+of the goal position of tile 1 in the same column or vice versa, also tile 8 and tile 7 are in a linear conflict
+as 8 stands in the path of the goal position of tile 7 in the same row. Hence here we see there are 2 linear conflicts.
+
+As we know that heuristic value is the value that gives a theoretical least value of the number of moves required
+to solve the problem we can see that one linear conflict causes two moves to be added to the final heuristic value(h)
+as one tile will have to move aside in order to make way for the tile that has the goal state behind the moved tile
+and then back resulting in 2 moves which retains the admissibility of the heuristic.
+
+Linear conflict is always combined with the Manhattan distance to get the heuristic value of that state and each
+linear conflict will add 2 moves to the Manhattan distance as explained above, so the ¡®h¡¯ value for the above state will be
+
+Manhattan distance + 2*number of linear conflicts
+
+Manhattan distance for the state is: 10
+Final h: 10 + 2*2= 14
+
+Linear Conflict combined with Manhattan distance is significantly way faster than the heuristics explained above
+and 4 x 4 puzzles can be solved using it in a decent amount of time.Just as the rest of the heuristics above we do
+not consider the blank tile when calculating linear conflicts.
+
+
 3 6 2 5 1 4 8 7 0
 */
 
@@ -53,7 +83,8 @@ vector<Node>::iterator itor;
 vector<int> test;
 int dx[4] = {0, 0, 1, -1};
 int dy[4] = {1, -1, 0, 0};
-const int METHOD = 2;
+
+const int METHOD = 1;
 
 void inputNode(Node *n);
 void outputNode(Node n);
@@ -61,6 +92,7 @@ int getEvaluate(Node n);
 int evaluate(Node n);
 int evaluate1(Node n);
 int evaluate2(Node n);
+int evaluate3(Node n);
 bool compare(Node a, Node b);
 int ifInOpen(Node n);
 int ifInClose(Node n);
@@ -71,6 +103,7 @@ int getFatherStatus(int fatherIndex);
 int main()
 {
     Node start;
+    int nodesCount = 1;
     inputNode(&start);
 
     if(ifNoSolution(start)){
@@ -95,6 +128,7 @@ int main()
         cout<<"---------------------------\n";
         outputNode(current);
         cout << "g:" << current.g << " --- h:" << current.h << endl;
+        cout << "sum:" << evaluate3(current) << endl;
 
         if(current.h == 0){
             terminateStatus = current.father;
@@ -152,6 +186,7 @@ int main()
             tmp.g = current.g + 1;
             tmp.h = getEvaluate(tmp);
             tmp.f = tmp.g + tmp.h;
+            nodesCount++;
 
             cout<<"--------\n";
             outputNode(tmp);
@@ -203,6 +238,7 @@ int main()
 
     cout << "---step" << step++ << ":---\n";
     cout << "0 1 2\n3 4 5\n6 7 8\n";
+    cout << "Spread " << nodesCount << " nodes.\n";
 
     return 0;
 }
@@ -317,6 +353,9 @@ int getEvaluate(Node n){
     else if (METHOD == 2){
         return evaluate2(n);
     }
+    else if (METHOD == 3){
+        return evaluate3(n);
+    }
 }
 
 int evaluate(Node n){
@@ -358,6 +397,70 @@ int evaluate2(Node n){
     }
 
     return h;
+}
+
+int evaluate3(Node n){
+    int sum = 0;
+    for(int i = 0; i< 3; i++){
+        int tmp[3] = {9, 9, 9};
+        int index = 0;
+
+        for(int j = 0; j < 3; j++){
+            if(n.node[i][j] && n.node[i][j] / 3 == i){
+                tmp[index++] = n.node[i][j];
+            }
+        }
+
+        int reserve = 0;
+        if(tmp[0] > tmp[1]){
+            reserve++;
+        }
+        if(tmp[0] > tmp[2]){
+            reserve++;
+        }
+        if(tmp[1] > tmp[2]){
+            reserve++;
+        }
+
+        if(reserve > 1){
+            sum += (reserve - 1);
+        }
+        else {
+            sum += reserve;
+        }
+    }
+
+    for(int j = 0; j< 3; j++){
+        int tmp[3] = {9, 9, 9};
+        int index = 0;
+
+        for(int i = 0; i < 3; i++){
+            if(n.node[i][j] && n.node[i][j] % 3 == j){
+                tmp[index++] = n.node[i][j];
+            }
+        }
+
+        int reserve = 0;
+        if(tmp[0] > tmp[1]){
+            reserve++;
+        }
+        if(tmp[0] > tmp[2]){
+            reserve++;
+        }
+        if(tmp[1] > tmp[2]){
+            reserve++;
+        }
+
+        if(reserve > 1){
+            sum += (reserve - 1);
+        }
+        else {
+            sum += reserve;
+        }
+    }
+
+    return evaluate2(n) + sum * 2;
+//    return sum;
 }
 
 
